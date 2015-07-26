@@ -17,6 +17,7 @@ use GoCardless\Pro\Models\RedirectFlow;
 use GoCardless\Pro\Models\Subscription;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
+use Psr\Http\Message\StreamInterface;
 
 class Api
 {
@@ -364,7 +365,7 @@ class Api
      *
      * @param array $options Endpoint options (for prefilling mandate)
      *
-     * @return \GuzzleHttp\Stream\StreamInterface
+     * @return StreamInterface
      */
     public function createMandatePdf($options = [])
     {
@@ -376,8 +377,8 @@ class Api
             $payload = ['data' => $options];
 
             $response = $this->client->post($this->url($endpoint, $path), [
-                'headers' => $headers,
-                'json'    => $payload
+                'headers'   => $headers,
+                'body'      => json_encode($payload)
             ]);
         } catch (BadResponseException $ex) {
             $this->handleBadResponseException($ex);
@@ -396,7 +397,7 @@ class Api
      *
      * @param string|Mandate $id Mandate ID e.g. MD123 or a Mandate object
      *
-     * @return \GuzzleHttp\Stream\StreamInterface
+     * @return StreamInterface
      */
     public function getMandatePdf($id)
     {
@@ -644,11 +645,12 @@ class Api
         try {
             $response = $this->client->post(
                 $this->url(self::REDIRECT_FLOWS, $id . '/actions/complete'), [
-                    'headers' => $this->headers(),
-                    'json' => ['data' => ['session_token' => $sessionToken]]
+                    'headers'   => $this->headers(),
+                    'body'      => json_encode(['data' => ['session_token' => $sessionToken]])
                 ]
-            )->json();
+            );
 
+            $response = json_decode($response->getBody()->getContents(), true);
         } catch (BadResponseException $ex) {
             $this->handleBadResponseException($ex);
         }
@@ -667,9 +669,11 @@ class Api
     {
         try {
             $response = $this->client->get($this->url($endpoint, $path), [
-                'headers' => $this->headers(),
-                'query'   => $params
-            ])->json();
+                'headers'   => $this->headers(),
+                'query'     => $params
+            ]);
+
+            $response = json_decode($response->getBody()->getContents(), true);
         } catch (BadResponseException $ex) {
             $this->handleBadResponseException($ex);
         }
@@ -717,9 +721,11 @@ class Api
             $payload = $data ? [$endpoint => $data] : null;
 
             $response = $this->client->$method($this->url($endpoint, $path), [
-                'headers' => $this->headers(),
-                'json'    => $payload
-            ])->json();
+                'headers'   => $this->headers(),
+                'body'      => json_encode($payload)
+            ]);
+
+            $response = json_decode($response->getBody()->getContents(), true);
         } catch (BadResponseException $ex) {
             $this->handleBadResponseException($ex);
         }
@@ -789,7 +795,7 @@ class Api
      */
     private function handleBadResponseException(BadResponseException $ex)
     {
-        $response = $ex->getResponse()->json();
+        $response = json_decode($ex->getResponse()->getBody()->getContents(), true);
 
         switch ($response['error']['type']) {
             case 'invalid_state' :
@@ -836,7 +842,10 @@ class Api
         switch ($response['error']['errors'][0]['reason']) {
             case 'resource_not_found' :
                 throw new ResourceNotFoundException(
-                    sprintf('Resource not found at %s', $ex->getRequest()->getResource()),
+                    sprintf(
+                        'Resource not found at %s',
+                        $ex->getRequest()->getRequestTarget()
+                    ),
                     $ex->getCode()
                 );
             case 'version_not_found' :
