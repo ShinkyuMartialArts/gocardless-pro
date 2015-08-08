@@ -15,6 +15,7 @@ use GoCardless\Pro\Models\Mandate;
 use GoCardless\Pro\Models\MandatePdf;
 use GoCardless\Pro\Models\Payment;
 use GoCardless\Pro\Models\RedirectFlow;
+use GoCardless\Pro\Models\Refund;
 use GoCardless\Pro\Models\Subscription;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
@@ -28,6 +29,7 @@ class Api
     const CUSTOMER_BANK_ACCOUNTS = 'customer_bank_accounts';
     const MANDATES               = 'mandates';
     const PAYMENTS               = 'payments';
+    const REFUNDS                = 'refunds';
     const REDIRECT_FLOWS         = 'redirect_flows';
     const SUBSCRIPTIONS          = 'subscriptions';
     const MANDATE_PDFS           = 'mandate_pdfs';
@@ -412,6 +414,63 @@ class Api
 
         return Payment::fromArray($response);
     }
+
+    /**
+     * @see https://developer.gocardless.com/pro/#payments-retry-a-refund
+     *
+     * @param Refund $refund
+     *
+     * @return Refund
+     */
+    public function createRefund(Refund $refund)
+    {
+        $response = $this->post(self::REFUNDS, $refund->toArray());
+
+        return Refund::fromArray($response);
+    }
+
+    /**
+     * @see https://developer.gocardless.com/pro/#subscriptions-list-refunds
+     *
+     * @param array $options
+     *
+     * @return array
+     */
+    public function listRefunds($options = [])
+    {
+        $response = $this->get(self::REFUNDS, $options);
+
+        return $this->buildCollection(new Refund, $response);
+    }
+
+    /**
+     * @see https://developer.gocardless.com/pro/#mandates-get-a-single-refund
+     *
+     * @param $id
+     *
+     * @return Refund
+     */
+    public function getRefund($id)
+    {
+        $response = $this->get(self::REFUNDS, [], $id);
+
+        return Refund::fromArray($response);
+    }
+
+    /**
+     * @see https://developer.gocardless.com/pro/#refunds-update-a-refund
+     *
+     * @param Refund $refund
+     *
+     * @return Refund
+     */
+    public function updateRefund(Refund $refund)
+    {
+        $response = $this->put(self::REFUNDS, $refund->toArrayForUpdating(), $refund->getId());
+
+        return Refund::fromArray($response);
+    }
+
 
     /**
      * @see https://developer.gocardless.com/pro/#subscriptions-create-a-subscription

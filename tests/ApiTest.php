@@ -7,6 +7,7 @@ use GoCardless\Pro\Models\Customer;
 use GoCardless\Pro\Models\CustomerBankAccount;
 use GoCardless\Pro\Models\Mandate;
 use GoCardless\Pro\Models\Payment;
+use GoCardless\Pro\Models\Refund;
 use GoCardless\Pro\Models\Subscription;
 use GuzzleHttp\Client;
 
@@ -380,6 +381,41 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         return $payment;
     }
 
+    /** @depends test_it_can_get_a_single_payment */
+    function test_it_can_create_a_refund(Payment $payment)
+    {
+        $refund = new Refund($payment, 100);
+
+        $refund = $this->api->createRefund($refund);
+
+        $this->assertInstanceOf('GoCardless\Pro\Models\Refund', $refund);
+        $this->assertNotNull($refund->getId());
+        $this->assertNotNull($refund->getCreatedAt());
+        $this->assertSame(100, $refund->getAmount());
+        $this->assertSame($payment->getCurrency(), $refund->getCurrency());
+    }
+
+    /** @test */
+    function it_can_list_refunds()
+    {
+        $refunds = $this->api->listRefunds();
+
+        $this->assertInternalType('array', $refunds);
+        foreach ($refunds as $refund) {
+            $this->assertInstanceOf('GoCardless\Pro\Models\Refund', $refund);
+        }
+    }
+
+    /** @depends test_it_can_create_a_refund */
+    function test_it_can_get_a_single_refund(Refund $old)
+    {
+        $new = $this->api->getRefund($old->getId());
+
+        $this->assertEquals($old->toArray(), $new->toArray());
+
+        return $new;
+    }
+
     /** @depends test_it_can_create_a_mandate */
     function test_it_can_create_a_subscription(Mandate $mandate)
     {
@@ -393,7 +429,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('GoCardless\Pro\Models\Subscription', $subscription);
         $this->assertNotNull($subscription->getId());
         $this->assertNotNull($subscription->getCreatedAt());
-        $this->assertNotNull($subscription->getStartAt());
+        $this->assertNotNull($subscription->getStartDate());
         $this->assertTrue($subscription->isActive());
         $this->assertSame(1000, $subscription->getAmount());
         $this->assertSame('GBP', $subscription->getCurrency());
@@ -408,7 +444,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInternalType('array', $subscriptions);
         foreach ($subscriptions as $subscription) {
-            $this->assertInstanceOf('GoCardless\Pro\Models\CustomerBankAccount', $subscription);
+            $this->assertInstanceOf('GoCardless\Pro\Models\Subscription', $subscription);
         }
     }
 
@@ -620,10 +656,4 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    /** @test */
-    /** only requires account number, branch code (sort code) and country code to be set*/
-    public function it_returns_modulus_check(CustomerBankAccount $account)
-    {
-        $this->api->modulusCheck($account);
-    }
 }
