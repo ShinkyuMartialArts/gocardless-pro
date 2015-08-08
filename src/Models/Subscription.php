@@ -18,7 +18,7 @@ class Subscription extends Entity
     /** @var integer */
     private $day_of_month;
     /** @var string */
-    private $end_at;
+    private $end_date;
     /** @var integer */
     private $interval;
     /** @var string */
@@ -30,7 +30,7 @@ class Subscription extends Entity
     /** @var string */
     private $payment_reference;
     /** @var string */
-    private $start_at;
+    private $start_date;
     /** @var string */
     private $status;
     /** @var array */
@@ -54,7 +54,7 @@ class Subscription extends Entity
      */
     public function from($date)
     {
-        return $this->setStartAt($date);
+        return $this->setStartDate($date);
     }
 
     /**
@@ -63,7 +63,7 @@ class Subscription extends Entity
      */
     public function until($date)
     {
-        return $this->setEndAt($date);
+        return $this->setEndDate($date);
     }
 
     /**
@@ -216,18 +216,18 @@ class Subscription extends Entity
     /**
      * @return string
      */
-    public function getEndAt()
+    public function getEndDate()
     {
-        return $this->end_at;
+        return $this->end_date;
     }
 
     /**
      * @param $date
      * @return $this
      */
-    public function setEndAt($date)
+    public function setEndDate($date)
     {
-        $this->end_at = $date;
+        $this->end_date = $date;
         return $this;
     }
 
@@ -324,18 +324,18 @@ class Subscription extends Entity
     /**
      * @return string
      */
-    public function getStartAt()
+    public function getStartDate()
     {
-        return $this->start_at;
+        return $this->start_date;
     }
 
     /**
      * @param $date
      * @return $this
      */
-    public function setStartAt($date)
+    public function setStartDate($date)
     {
-        $this->start_at = $date;
+        $this->start_date = $date;
         return $this;
     }
 
