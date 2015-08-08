@@ -15,7 +15,7 @@ class CustomerBankAccount extends BankAccount
      *
      * @param $account_holder_name
      * @param $account_number
-     * @param $sort_code
+     * @param $branch_code
      * @param $country_code
      * @param Customer $owner
      * @return $this
@@ -29,7 +29,7 @@ class CustomerBankAccount extends BankAccount
     ) {
         return $this->setAccountHolderName($account_holder_name)
             ->setAccountNumber($account_number)
-            ->setBranchCode($sort_code)
+            ->setBranchCode($branch_code)
             ->setCountryCode($country_code)
             ->setOwner($owner);
     }
