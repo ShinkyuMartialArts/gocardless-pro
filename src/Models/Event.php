@@ -33,6 +33,11 @@ class Event extends Entity
         return $this->resource_type;
     }
 
+    public function getResources()
+    {
+        return $this->resources;
+    }
+
     public function setResources(array $resources)
     {
         $this->resources = $resources;

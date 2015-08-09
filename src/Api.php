@@ -553,7 +553,7 @@ class Api
 
     /**
      * @see https://developer.gocardless.com/pro/#subscriptions-list-events
-     * The GoCardless api allows for linked objects to be return with an event using the 'include' option together with the 'resource_type' option.
+     * The GoCardless api allows for linked objects to be returned with an event using the 'include' option together with the 'resource_type' option.
      * This breaks this class methodology of returning the data pertaining to the endpoint object and would need an additional method for handling linked objects.
      * This implementation makes additional api calls for all linked objects if withResources is set to true.
      *
