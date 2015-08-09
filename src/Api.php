@@ -15,6 +15,7 @@ use GoCardless\Pro\Models\Event;
 use GoCardless\Pro\Models\Mandate;
 use GoCardless\Pro\Models\MandatePdf;
 use GoCardless\Pro\Models\Payment;
+use GoCardless\Pro\Models\Payout;
 use GoCardless\Pro\Models\RedirectFlow;
 use GoCardless\Pro\Models\Refund;
 use GoCardless\Pro\Models\Subscription;
@@ -31,6 +32,7 @@ class Api
     const EVENTS                 = 'events';
     const MANDATES               = 'mandates';
     const PAYMENTS               = 'payments';
+    const PAYOUTS                = 'payouts';
     const REFUNDS                = 'refunds';
     const REDIRECT_FLOWS         = 'redirect_flows';
     const SUBSCRIPTIONS          = 'subscriptions';
@@ -570,6 +572,13 @@ class Api
         return $this->buildCollection(new Event, $response);
     }
 
+    /**
+     * @see https://developer.gocardless.com/pro/2015-07-06/#events-get-a-single-event
+     *
+     * @param $id
+     * @param bool|false $withResources
+     * @return array|mixed|static
+     */
     public function getEvent($id, $withResources = false)
     {
         $event = $this->get(self::EVENTS, [], $id);
@@ -582,6 +591,69 @@ class Api
         return $event;
     }
 
+
+    /**
+     * @see https://developer.gocardless.com/pro/2015-07-06/#payouts-list-payouts
+     *
+     * @param array $options
+     * @return array
+     */
+    public function listPayouts($options = [])
+    {
+        $response = $this->get(self::PAYOUTS, $options);
+
+        return $this->buildCollection(new Payout, $response);
+    }
+
+    /**
+     * @see https://developer.gocardless.com/pro/2015-07-06/#payouts-get-a-single-payout
+     *
+     * @param $id
+     * @return static
+     */
+    public function getPayout($id)
+    {
+        $payout = $this->get(self::PAYOUTS, [], $id);
+
+        return Payout::fromArray($payout);
+    }
+
+    /**
+     * @see https://developer.gocardless.com/pro/2015-07-06/#events-reconciling-payouts-with-events
+     *
+     * @param $id
+     * @return array
+     */
+    public function reconcilePayout($id)
+    {
+        $payments = [];
+        $refunds = [];
+
+        $event = $this->listEvents(['payout' => $id, 'action' => 'paid']);
+        $payoutEvent = Event::fromArray($event[0]);
+
+        $events = $this->listEvents(['parent_event' => $payoutEvent->getId()], true);
+
+        foreach ($events as $event) {
+            $paymentEvent = Event::fromArray($event);
+
+            if ($paymentEvent->getResourceType() == 'payments') {
+                $payment = $paymentEvent->getResources()['payment'];
+                $payments[] = $payment->toArray();
+            }
+
+            if ($paymentEvent->getResourceType() == 'refunds') {
+                $refund = $paymentEvent->getResources()['refund'];
+                $refunds[] = $refund->toArray();
+            }
+        }
+
+        return [
+            'payout' => $this->getPayout($id)->toArray(),
+            'payments' => $payments,
+            'refunds' => $refunds
+        ];
+    }
 
 
     /**

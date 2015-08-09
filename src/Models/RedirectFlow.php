@@ -114,7 +114,7 @@ class RedirectFlow extends Entity
     }
 
     /**
-     * Sets scheme internally. Use specific setter e.g. use Bacs publicly
+     * Sets scheme internally. Use specific setter e.g. useBacs publicly
      *
      * @param string $scheme Scheme type
      *
