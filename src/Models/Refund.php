@@ -9,15 +9,19 @@ class Refund extends Entity
     use Factory;
     use Metadata;
 
-    /** @var $string */
+    /** @var string */
     private $amount;
-    /** @var $string */
+    /** @var string */
     private $total_amount_confirmation;
-    /** @var $string */
+    /** @var string */
     private $currency;
     /** @var Payment */
     private $payment;
 
+    /**
+     * @param Payment|null $payment
+     * @param int $amount
+     */
     public function __construct(Payment $payment = null, $amount = 0)
     {
         if ($payment !== null) {
@@ -35,29 +39,47 @@ class Refund extends Entity
         }
     }
 
+    /**
+     * @param $amount
+     * @return $this
+     */
     public function setAmount($amount)
     {
         $this->amount = intval($amount);
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getAmount()
     {
         return $this->amount;
     }
 
+    /**
+     * @param $amount
+     * @return $this
+     */
     public function setTotalAmountConfirmation($amount)
     {
         $this->total_amount_confirmation = intval($amount);
         return $this;
     }
 
+    /**
+     * @param Payment $payment
+     * @return $this
+     */
     public function setPayment(Payment $payment)
     {
         $this->payment = $payment;
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getCurrency()
     {
         return $this->currency;
@@ -70,6 +92,9 @@ class Refund extends Entity
         ];
     }
 
+    /**
+     * @return array
+     */
     public function toArray()
     {
         $refund = array_filter(get_object_vars($this));
