@@ -11,6 +11,7 @@ use GoCardless\Pro\Models\Creditor;
 use GoCardless\Pro\Models\CreditorBankAccount;
 use GoCardless\Pro\Models\Customer;
 use GoCardless\Pro\Models\CustomerBankAccount;
+use GoCardless\Pro\Models\Event;
 use GoCardless\Pro\Models\Mandate;
 use GoCardless\Pro\Models\MandatePdf;
 use GoCardless\Pro\Models\Payment;
@@ -27,6 +28,7 @@ class Api
     const CREDITOR_BANK_ACCOUNTS = 'creditor_bank_accounts';
     const CUSTOMERS              = 'customers';
     const CUSTOMER_BANK_ACCOUNTS = 'customer_bank_accounts';
+    const EVENTS                 = 'events';
     const MANDATES               = 'mandates';
     const PAYMENTS               = 'payments';
     const REFUNDS                = 'refunds';
@@ -57,6 +59,11 @@ class Api
      * @var string
      */
     private $environment;
+
+    /**
+     * @var bool
+     */
+    private $eventResources = false;
 
     public function __construct(Client $client, $accessToken, $version, $environment = 'staging')
     {
@@ -545,6 +552,39 @@ class Api
 
 
     /**
+     * @see https://developer.gocardless.com/pro/#subscriptions-list-events
+     * The GoCardless api allows for linked objects to be return with an event using the 'include' option together with the 'resource_type' option.
+     * This breaks this class methodology of returning the data pertaining to the endpoint object and would need an additional method for handling linked objects.
+     * This implementation makes additional api calls for all linked objects if withResources is set to true.
+     *
+     * @param array $options
+     * @param bool $withResources
+     *
+     * @return array
+     */
+    public function listEvents($options = [], $withResources = false)
+    {
+        $this->eventResources = $withResources;
+        $response = $this->get(self::EVENTS, $options);
+
+        return $this->buildCollection(new Event, $response);
+    }
+
+    public function getEvent($id, $withResources = false)
+    {
+        $event = $this->get(self::EVENTS, [], $id);
+        $event = Event::fromArray($event);
+
+        if ($withResources) {
+            $event = $this->resourcesFromEvent($event);
+        }
+
+        return $event;
+    }
+
+
+
+    /**
      * @see https://developer.gocardless.com/pro/#redirect-flows-create-a-redirect-flow
      *
      * @param RedirectFlow $redirectFlow Redirect Flow Entity
@@ -764,20 +804,42 @@ class Api
     }
 
     /**
-     * @param Entity $model
+     * @param Entity $entity
      * @param array $response
      *
      * @return array
      */
-    private function buildCollection(Entity $model, array $response)
+    private function buildCollection(Entity $entity, array $response)
     {
         $collection = [];
 
         foreach ($response as $details) {
-            $collection[] = $model::fromArray($details);
+            $model = $entity::fromArray($details);
+            if ($model instanceof Event && $this->eventResources) {
+                $model = $this->resourcesFromEvent($model);
+            }
+            $collection[] = $model;
         }
 
         return $collection;
+    }
+
+    /**
+     * @param Event $event
+     * @return mixed
+     */
+    private function resourcesFromEvent(Event $event)
+    {
+        $resources = [];
+
+        foreach ($event->getLinks() as $resource => $link) {
+            $function = 'get' . str_replace('parent_', '', $resource);
+            if (method_exists($this, $function)) {
+                $resources[$resource] = $this->$function($link);
+            }
+        }
+
+        return $event->setResources($resources);
     }
 
     /**
