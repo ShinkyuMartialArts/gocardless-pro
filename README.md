@@ -1,16 +1,14 @@
 # Overview
 
-## Work In Progress
+This is a fork from Sneek/gocardless-pro. All credit to Sneek for providing the base for this project. The Shinkyu version includes features such as support for webhooks, events, subscriptions, refunds and payouts.
 
-This package is in very early development and lots of things may change! 
-Please explore the source and test cases to get a clearer understanding. Also
- make sure you sign up to GoCardless Pro and read their documentation.
- 
-> Take a look in the examples folder to get started 
+## GoCardless API Version
+
+The api version supported is 2015-07-06 and documentation can be found here: [developer.gocardless.com/pro/2015-07-06] (https://developer.gocardless.com/pro/2015-07-06/)
 
 ## Installation
 
-The recommended way to install GoCardless Pro is with `Composer <http://getcomposer.org>`_. Composer is a dependency
+The recommended way to install GoCardless Pro is with `Composer <http://getcomposer.org>`. Composer is a dependency
 management tool for PHP that allows you to declare the dependencies your project needs and installs them into your
 project.
 
@@ -22,7 +20,7 @@ curl -sS https://getcomposer.org/installer | php
 You can add GoCardless Pro as a dependency using the composer.phar CLI:
 
 ```bash
-php composer.phar require sneek/gocardless-pro:@stable
+php composer.phar require shinkyu/gocardless-pro:@stable
 ```
 
 Alternatively, you can specify GoCardless Pro as a dependency in your project's
@@ -31,7 +29,7 @@ existing composer.json file:
 ```javascript
 {
   "require": {
-     "sneek/gocardless-pro": "@stable"
+     "shinkyu/gocardless-pro": "@stable"
   }
 }
 ```
@@ -55,7 +53,7 @@ branch by setting the version requirement for GoCardless Pro to ``@dev``.
 ```javascript
 {
   "require": {
-     "sneek/gocardless-pro": "@dev"
+     "shinkyu/gocardless-pro": "@dev"
   }
 }
 ```
@@ -100,7 +98,7 @@ In order to contribute, you'll need to checkout the source from GitHub and
 install GoCardless Pro's dependencies using Composer:
 
 ```
-git clone https://github.com/sneek/gocardless-pro.git
+git clone https://github.com/shinkyu/gocardless-pro.git
 cd guzzle && curl -s http://getcomposer.org/installer | php && ./composer.phar install --dev
 ```
 
