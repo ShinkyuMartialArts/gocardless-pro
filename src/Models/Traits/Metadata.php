@@ -95,6 +95,18 @@ trait Metadata
     }
 
     /**
+     * Clears all meta data from Entity
+     *
+     * @return Entity
+     */
+    public function clearMetadata()
+    {
+        $this->metadata = [];
+
+        return $this;
+    }
+
+    /**
      * Checks the item being added is valid
      *
      * @throws \OutOfBoundsException If too many metadata items exist
