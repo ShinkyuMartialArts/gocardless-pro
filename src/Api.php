@@ -383,6 +383,20 @@ class Api
     }
 
     /**
+     * @see https://developer.gocardless.com/pro/#payments-list-payments
+     *
+     * @param array $options
+     *
+     * @return array
+     */
+    public function listPayments($options = [])
+    {
+        $response = $this->get(self::PAYMENTS, $options);
+
+        return $this->buildCollection(new Payment, $response);
+    }
+
+    /**
      * @see https://developer.gocardless.com/pro/#payments-get-a-single-payment
      *
      * @param $id
